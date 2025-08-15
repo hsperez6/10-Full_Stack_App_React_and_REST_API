@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import UserContext from "../context/UserContext.jsx";
 
 const CourseUpdate = () => {
+  const { user } = useContext(UserContext);
   const [course, setCourse] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -15,16 +17,26 @@ const CourseUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Check if user is authenticated, redirect to signin if not
   useEffect(() => {
+    if (!user || !user.credentials) {
+      navigate('/signin');
+      return;
+    }
+    
     if (id) {
       fetchCourse();
     }
-  }, [id]);
+  }, [user, navigate, id]);
 
   const fetchCourse = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/courses/${id}`);
+      const response = await fetch(`/api/courses/${id}`, {
+        headers: {
+          'Authorization': `Basic ${user.credentials}`
+        }
+      });
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -35,6 +47,14 @@ const CourseUpdate = () => {
       
       const data = await response.json();
       setCourse(data.course);
+      
+      // Check if the current user owns this course
+      if (data.course.userId !== user.id) {
+        setErrors(['You are not authorized to update this course.']);
+        setLoading(false);
+        return;
+      }
+      
       setFormData({
         title: data.course.title || '',
         description: data.course.description || '',
@@ -68,6 +88,7 @@ const CourseUpdate = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Basic ${user.credentials}`
         },
         body: JSON.stringify(formData),
       });

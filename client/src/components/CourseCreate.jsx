@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import UserContext from "../context/UserContext.jsx";
 
 const CourseCreate = () => {
+  const { user } = useContext(UserContext);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -11,6 +13,12 @@ const CourseCreate = () => {
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Redirect if user is not authenticated
+  if (!user || !user.credentials) {
+    navigate('/signin');
+    return null;
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,6 +38,7 @@ const CourseCreate = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Basic ${user.credentials}`
         },
         body: JSON.stringify(formData),
       });

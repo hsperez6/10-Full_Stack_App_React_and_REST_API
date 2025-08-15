@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-
-
+import UserContext from "../context/UserContext.jsx";
 
 const UserSignUp = () => {
   const [firstName, setFirstName] = useState("");
@@ -11,6 +10,7 @@ const UserSignUp = () => {
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { actions } = useContext(UserContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,8 +34,10 @@ const UserSignUp = () => {
       });
 
       if (response.ok) {
-        // User created successfully, redirect to sign in
-        navigate("/signin");
+        // User created successfully, automatically sign them in
+        await actions.signIn(emailAddress, password);
+        // Redirect to courses list
+        navigate("/");
       } else {
         const errorData = await response.json();
         if (errorData.errors) {

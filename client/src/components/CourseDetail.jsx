@@ -1,23 +1,35 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import UserContext from "../context/UserContext.jsx";
 
 const CourseDetail = () => {
+  const { user } = useContext(UserContext);
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Check if user is authenticated, redirect to signin if not
   useEffect(() => {
+    if (!user || !user.credentials) {
+      navigate('/signin');
+      return;
+    }
+    
     if (id) {
       fetchCourse();
     }
-  }, [id]);
+  }, [user, navigate, id]);
 
   const fetchCourse = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/courses/${id}`);
+      const response = await fetch(`/api/courses/${id}`, {
+        headers: {
+          'Authorization': `Basic ${user.credentials}`
+        }
+      });
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -44,6 +56,7 @@ const CourseDetail = () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Basic ${user.credentials}`
           },
         });
 
@@ -99,15 +112,19 @@ const CourseDetail = () => {
     <div>
       <div className="actions--bar">
         <div className="wrap">
-          <a className="button" href={`/courses/${id}/update`}>
-            Update Course
-          </a>
-          <button className="button" onClick={handleDelete}>
-            Delete Course
-          </button>
-          <a className="button button-secondary" href="/">
+          {user && course && user.id === course.userId && (
+            <>
+              <Link className="button" to={`/courses/${id}/update`}>
+                Update Course
+              </Link>
+              <button className="button" onClick={handleDelete}>
+                Delete Course
+              </button>
+            </>
+          )}
+          <Link className="button button-secondary" to="/">
             Return to List
-          </a>
+          </Link>
         </div>
       </div>
 

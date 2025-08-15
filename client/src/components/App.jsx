@@ -11,6 +11,7 @@ import CourseCreate from "./CourseCreate";
 import CourseUpdate from "./CourseUpdate";
 import UserSignIn from "./UserSignIn";
 import UserSignUp from "./UserSignUp";
+import UserSignOut from "./UserSignOut";
   
 const App = () => {
 
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/courses/:id/update" element={<CourseUpdate />} />
         <Route path="/signin" element={<UserSignIn />} />
         <Route path="/signup" element={<UserSignUp />} />
+        <Route path="/signout" element={<UserSignOut />} />
       </Routes>
     </>
   );

@@ -14,9 +14,9 @@ const UserSignIn = () => {
   const navigate = useNavigate();
 
   // Event Handlers
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    actions.signIn(emailAddress.current.value, password.current.value);
+    await actions.signIn(emailAddress.current.value, password.current.value);
     navigate("/");
   };
 
@@ -31,9 +31,9 @@ const UserSignIn = () => {
 
       <form>
         <label htmlFor="emailAddress">Email Address</label>
-        <input id="emailAddress" name="emailAddress" type="email" value="" />
+        <input id="emailAddress" name="emailAddress" type="email" ref={emailAddress} />
         <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" value="" />
+        <input id="password" name="password" type="password" ref={password} />
         <button className="button" type="submit" onClick={handleSubmit}>
           Sign In
         </button>

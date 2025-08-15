@@ -1,14 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import UserContext from "../context/UserContext.jsx";
 
 const Courses = () => {
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Check if user is authenticated, redirect to signin if not
   useEffect(() => {
+    if (!user || !user.credentials) {
+      navigate('/signin');
+      return;
+    }
     fetchCourses();
-  }, []);
+  }, [user, navigate]);
 
   const fetchCourses = async () => {
     try {
