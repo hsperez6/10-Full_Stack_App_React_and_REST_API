@@ -1,25 +1,68 @@
-import React, { useRef, useContext } from "react";
+import React, { useRef, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext.jsx";
+import ValidationErrors from "./ValidationErrors.jsx";
 
 import "../global.css";
 
+/**
+ * UserSignIn Component
+ * 
+ * Form component that handles user authentication by collecting email and password.
+ * This component manages form state, handles authentication through UserContext,
+ * displays validation errors, and redirects users upon successful sign-in.
+ * Uses useRef for form inputs to avoid unnecessary re-renders.
+ */
 const UserSignIn = () => {
+  // Get authentication actions from UserContext
   const { actions } = useContext(UserContext);
+  
+  // STATE MANAGEMENT
+  const [errors, setErrors] = useState([]);          // Validation and authentication errors
+  const [loading, setLoading] = useState(false);     // Loading state during form submission
 
-  // State
+  // Form input references using useRef for performance optimization
   const emailAddress = useRef(null);
   const password = useRef(null);
 
+  // Navigation function for redirects
   const navigate = useNavigate();
 
-  // Event Handlers
+  /**
+   * Handles form submission for user authentication
+   * Attempts to sign in the user and handles success/failure responses
+   * @param {Event} event - The form submission event
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await actions.signIn(emailAddress.current.value, password.current.value);
-    navigate("/");
+    setLoading(true);
+    setErrors([]);
+
+    try {
+      // Attempt to sign in using credentials from form
+      const result = await actions.signIn(emailAddress.current.value, password.current.value);
+      
+      if (result.success) {
+        // Sign in successful, redirect to courses list
+        navigate("/");
+      } else {
+        // Sign in failed, show error message from API
+        setErrors([result.message]);
+      }
+    } catch (error) {
+      // Handle unexpected errors during sign-in process
+      console.error('Error during sign in:', error);
+      setErrors(['An unexpected error occurred. Please try again.']);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  /**
+   * Handles form cancellation
+   * Redirects user back to the courses list
+   * @param {Event} event - The cancel button click event
+   */
   const handleCancel = (event) => {
     event.preventDefault();
     navigate("/");
@@ -28,22 +71,35 @@ const UserSignIn = () => {
   return (
     <div className="form--centered">
       <h2>Sign In</h2>
+      
+      {/* Display validation errors if any exist */}
+      <ValidationErrors errors={errors} />
 
       <form>
+        {/* Email address input field */}
         <label htmlFor="emailAddress">Email Address</label>
         <input id="emailAddress" name="emailAddress" type="email" ref={emailAddress} />
+        
+        {/* Password input field */}
         <label htmlFor="password">Password</label>
         <input id="password" name="password" type="password" ref={password} />
-        <button className="button" type="submit" onClick={handleSubmit}>
-          Sign In
+        
+        {/* Submit button - disabled during form submission */}
+        <button className="button" type="submit" onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Signing In...' : 'Sign In'}
         </button>
+        
+        {/* Cancel button - redirects to courses list */}
         <button
           className="button button-secondary"
           onClick={handleCancel}
+          disabled={loading}
         >
           Cancel
         </button>
       </form>
+      
+      {/* Link to sign up page for new users */}
       <p>
         Don't have a user account? Click here to{" "}
         <a href="/signup">sign up</a>!

@@ -2,26 +2,49 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import UserContext from "../context/UserContext.jsx";
 
+/**
+ * CourseDetail Component
+ * 
+ * Displays detailed information about a specific course including title, description,
+ * estimated time, materials needed, and instructor information. This component
+ * handles authentication checks, course fetching, and provides update/delete
+ * functionality for course owners.
+ */
 const CourseDetail = () => {
+  // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { id } = useParams();
-  const navigate = useNavigate();
+  
+  // STATE MANAGEMENT
+  const [course, setCourse] = useState(null);        // Current course data
+  const [loading, setLoading] = useState(true);      // Loading state indicator
+  const [error, setError] = useState(null);          // Error state for error handling
+  
+  // ROUTING AND NAVIGATION
+  const { id } = useParams();                        // Course ID from URL parameters
+  const navigate = useNavigate();                    // Navigation function
 
-  // Check if user is authenticated, redirect to signin if not
+  /**
+   * useEffect hook to handle authentication and course fetching
+   * Redirects unauthenticated users to signin page
+   * Fetches course data when component mounts or user/course ID changes
+   */
   useEffect(() => {
+    // Check if user is authenticated, redirect to signin if not
     if (!user || !user.credentials) {
       navigate('/signin');
       return;
     }
     
+    // Fetch course data if course ID is available
     if (id) {
       fetchCourse();
     }
   }, [user, navigate, id]);
 
+  /**
+   * Fetches course data from the API
+   * Handles authentication headers and error responses
+   */
   const fetchCourse = async () => {
     try {
       setLoading(true);
@@ -49,6 +72,10 @@ const CourseDetail = () => {
     }
   };
 
+  /**
+   * Handles course deletion with user confirmation
+   * Sends DELETE request to API and redirects to courses list on success
+   */
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
@@ -73,6 +100,7 @@ const CourseDetail = () => {
     }
   };
 
+  // LOADING STATE - Show loading message while fetching course data
   if (loading) {
     return (
       <main>
@@ -84,6 +112,7 @@ const CourseDetail = () => {
     );
   }
 
+  // ERROR STATE - Display error message with retry option
   if (error) {
     return (
       <main>
@@ -96,6 +125,7 @@ const CourseDetail = () => {
     );
   }
 
+  // NOT FOUND STATE - Course doesn't exist
   if (!course) {
     return (
       <main>
@@ -108,10 +138,13 @@ const CourseDetail = () => {
     );
   }
 
+  // MAIN RENDER - Display course details and action buttons
   return (
     <div>
+      {/* Action bar with update/delete buttons for course owners */}
       <div className="actions--bar">
         <div className="wrap">
+          {/* Only show update/delete buttons if user owns the course */}
           {user && course && user.id === course.userId && (
             <>
               <Link className="button" to={`/courses/${id}/update`}>
@@ -128,11 +161,13 @@ const CourseDetail = () => {
         </div>
       </div>
 
+      {/* Main content area displaying course information */}
       <main>
         <div className="wrap">
           <h2>Course Detail</h2>
           <form>
             <div className="main--flex">
+              {/* Left column - Course title, description, and instructor */}
               <div>
                 <h3 className="course--detail--title">COURSE</h3>
                 <h4 className="course--name">{course.title}</h4>
@@ -140,11 +175,14 @@ const CourseDetail = () => {
 
                 <p>{course.description}</p>
               </div>
+              
+              {/* Right column - Estimated time and materials needed */}
               <div>
                 <h3 className="course--detail--title">ESTIMATED TIME</h3>
                 <p>{course.estimatedTime}</p>
 
                 <h3 className="course--detail--title">MATERIALS NEEDED</h3>
+                {/* Display materials as list if available, otherwise show "No materials listed" */}
                 {course.materialsNeeded ? (
                   <ul className="course--detail--list">
                     {course.materialsNeeded.split('\n').map((material, index) => (

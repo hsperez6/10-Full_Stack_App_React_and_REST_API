@@ -1,23 +1,43 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext.jsx";
+import ValidationErrors from "./ValidationErrors.jsx";
 
+/**
+ * UserSignUp Component
+ * 
+ * Form component that handles new user registration by collecting user information.
+ * This component manages form state, handles user creation through the API,
+ * displays validation errors, and automatically signs in the user upon successful
+ * registration. It provides a seamless onboarding experience for new users.
+ */
 const UserSignUp = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [emailAddress, setEmailAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // STATE MANAGEMENT
+  const [firstName, setFirstName] = useState("");     // User's first name
+  const [lastName, setLastName] = useState("");       // User's last name
+  const [emailAddress, setEmailAddress] = useState(""); // User's email address
+  const [password, setPassword] = useState("");       // User's password
+  const [errors, setErrors] = useState([]);           // Validation and API errors
+  const [loading, setLoading] = useState(false);      // Loading state during form submission
+  
+  // Navigation function for redirects
   const navigate = useNavigate();
+  
+  // Get authentication actions from UserContext
   const { actions } = useContext(UserContext);
 
+  /**
+   * Handles form submission for user registration
+   * Creates a new user account and automatically signs them in
+   * @param {Event} event - The form submission event
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     setErrors([]);
 
     try {
+      // Prepare user data for API submission
       const user = {
         firstName: firstName,
         lastName: lastName,
@@ -25,6 +45,7 @@ const UserSignUp = () => {
         password: password
       };
 
+      // Send POST request to create new user account
       const response = await fetch("/api/users", {
         method: "POST",
         headers: {
@@ -35,10 +56,16 @@ const UserSignUp = () => {
 
       if (response.ok) {
         // User created successfully, automatically sign them in
-        await actions.signIn(emailAddress, password);
-        // Redirect to courses list
-        navigate("/");
+        const signInResult = await actions.signIn(emailAddress, password);
+        if (signInResult.success) {
+          // Redirect to courses list after successful sign-in
+          navigate("/");
+        } else {
+          // Sign in failed after user creation
+          setErrors([`User created successfully, but sign in failed: ${signInResult.message}`]);
+        }
       } else {
+        // Handle API error responses
         const errorData = await response.json();
         if (errorData.errors) {
           setErrors(errorData.errors);
@@ -47,6 +74,7 @@ const UserSignUp = () => {
         }
       }
     } catch (err) {
+      // Handle network or other errors
       console.error('Error creating user:', err);
       setErrors(['Failed to create user. Please try again.']);
     } finally {
@@ -54,6 +82,11 @@ const UserSignUp = () => {
     }
   };
 
+  /**
+   * Handles form cancellation
+   * Redirects user back to the courses list
+   * @param {Event} event - The cancel button click event
+   */
   const handleCancel = (event) => {
     event.preventDefault();
     navigate("/");
@@ -63,18 +96,11 @@ const UserSignUp = () => {
     <div className="form--centered">
       <h2>Sign Up</h2>
       
-      {errors.length > 0 && (
-        <div className="validation--errors">
-          <h3>Validation Errors</h3>
-          <ul>
-            {errors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Display validation errors if any exist */}
+      <ValidationErrors errors={errors} />
       
       <form onSubmit={handleSubmit}>
+        {/* First name input field */}
         <label htmlFor="firstName">First Name</label>
         <input 
           id="firstName" 
@@ -82,8 +108,9 @@ const UserSignUp = () => {
           type="text" 
           value={firstName} 
           onChange={(e) => setFirstName(e.target.value)} 
-          required
         />
+        
+        {/* Last name input field */}
         <label htmlFor="lastName">Last Name</label>
         <input 
           id="lastName" 
@@ -91,8 +118,10 @@ const UserSignUp = () => {
           type="text" 
           value={lastName} 
           onChange={(e) => setLastName(e.target.value)} 
-          required
+          
         />
+        
+        {/* Email address input field */}
         <label htmlFor="emailAddress">Email Address</label>
         <input 
           id="emailAddress" 
@@ -100,8 +129,9 @@ const UserSignUp = () => {
           type="email" 
           value={emailAddress} 
           onChange={(e) => setEmailAddress(e.target.value)}
-          required
         />
+        
+        {/* Password input field */}
         <label htmlFor="password">Password</label>
         <input 
           id="password" 
@@ -109,11 +139,14 @@ const UserSignUp = () => {
           type="password" 
           value={password} 
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
+        
+        {/* Submit button - disabled during form submission */}
         <button className="button" type="submit" disabled={loading}>
           {loading ? 'Creating User...' : 'Sign Up'}
         </button>
+        
+        {/* Cancel button - redirects to courses list */}
         <button 
           className="button button-secondary" 
           type="button" 
@@ -122,6 +155,8 @@ const UserSignUp = () => {
           Cancel
         </button>
       </form>
+      
+      {/* Link to sign in page for existing users */}
       <p>Already have a user account? Click here to <a href="/signin">sign in</a>!</p>
     </div>
   );

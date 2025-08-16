@@ -2,15 +2,33 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext.jsx";
 
+/**
+ * Courses Component
+ * 
+ * Main component that displays a list of all available courses in a grid layout.
+ * This component handles authentication checks, fetches courses from the API,
+ * and provides navigation to individual course details and course creation.
+ * Only authenticated users can access this component.
+ */
 const Courses = () => {
+  // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
+  
+  // ROUTING AND NAVIGATION
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // STATE MANAGEMENT
+  const [courses, setCourses] = useState([]);        // Array of course objects
+  const [loading, setLoading] = useState(true);      // Loading state indicator
+  const [error, setError] = useState(null);          // Error state for error handling
 
-  // Check if user is authenticated, redirect to signin if not
+  /**
+   * useEffect hook to handle authentication and course fetching
+   * Redirects unauthenticated users to signin page
+   * Fetches courses data when component mounts or user changes
+   */
   useEffect(() => {
+    // Check if user is authenticated, redirect to signin if not
     if (!user || !user.credentials) {
       navigate('/signin');
       return;
@@ -18,6 +36,10 @@ const Courses = () => {
     fetchCourses();
   }, [user, navigate]);
 
+  /**
+   * Fetches all courses from the API
+   * Updates the courses state and handles any errors that occur
+   */
   const fetchCourses = async () => {
     try {
       setLoading(true);
@@ -38,6 +60,7 @@ const Courses = () => {
     }
   };
 
+  // LOADING STATE - Show loading message while fetching courses
   if (loading) {
     return (
       <div id="root">
@@ -50,6 +73,7 @@ const Courses = () => {
     );
   }
 
+  // ERROR STATE - Display error message with retry button
   if (error) {
     return (
       <div id="root">
@@ -63,10 +87,12 @@ const Courses = () => {
     );
   }
 
+  // MAIN RENDER - Display courses grid and add course button
   return (
     <div id="root">
       <main>
         <div className="wrap main--grid">
+          {/* Render each course as a clickable link card */}
           {courses.map((course) => (
             <Link
               key={course.id}
@@ -78,11 +104,13 @@ const Courses = () => {
             </Link>
           ))}
 
+          {/* Add new course button - links to course creation form */}
           <Link
             to="/courses/create"
             className="course--module course--add--module"
           >
             <span className="course--add--title">
+              {/* Plus icon SVG for visual appeal */}
               <svg
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"

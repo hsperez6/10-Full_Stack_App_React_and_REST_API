@@ -1,34 +1,58 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext.jsx";
+import ValidationErrors from "./ValidationErrors.jsx";
 
+/**
+ * CourseUpdate Component
+ * 
+ * Form component that allows authenticated users to update existing courses.
+ * This component handles authentication checks, fetches the current course data,
+ * validates user ownership, and provides form submission with error handling.
+ * Only course owners can update their courses.
+ */
 const CourseUpdate = () => {
+  // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
-  const [course, setCourse] = useState(null);
-  const [formData, setFormData] = useState({
+  
+  // STATE MANAGEMENT
+  const [course, setCourse] = useState(null);                    // Current course data
+  const [formData, setFormData] = useState({                     // Form input values
     title: '',
     description: '',
     estimatedTime: '',
     materialsNeeded: ''
   });
-  const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [errors, setErrors] = useState([]);                      // Validation errors
+  const [loading, setLoading] = useState(true);                  // Loading state for initial fetch
+  const [submitting, setSubmitting] = useState(false);           // Loading state for form submission
+  
+  // ROUTING AND NAVIGATION
+  const { id } = useParams();                                    // Course ID from URL parameters
+  const navigate = useNavigate();                                // Navigation function
 
-  // Check if user is authenticated, redirect to signin if not
+  /**
+   * useEffect hook to handle authentication and course fetching
+   * Redirects unauthenticated users to signin page
+   * Fetches course data when component mounts or user/course ID changes
+   */
   useEffect(() => {
+    // Check if user is authenticated, redirect to signin if not
     if (!user || !user.credentials) {
       navigate('/signin');
       return;
     }
     
+    // Fetch course data if course ID is available
     if (id) {
       fetchCourse();
     }
   }, [user, navigate, id]);
 
+  /**
+   * Fetches course data from the API and populates the form
+   * Validates that the current user owns the course before allowing updates
+   */
   const fetchCourse = async () => {
     try {
       setLoading(true);
@@ -55,6 +79,7 @@ const CourseUpdate = () => {
         return;
       }
       
+      // Populate form with current course data
       setFormData({
         title: data.course.title || '',
         description: data.course.description || '',
@@ -70,6 +95,11 @@ const CourseUpdate = () => {
     }
   };
 
+  /**
+   * Handles input field changes
+   * Updates the corresponding field in formData state
+   * @param {Event} e - The change event from the input field
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -78,6 +108,11 @@ const CourseUpdate = () => {
     }));
   };
 
+  /**
+   * Handles form submission
+   * Sends PUT request to update the course via API
+   * @param {Event} e - The form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -114,6 +149,7 @@ const CourseUpdate = () => {
     }
   };
 
+  // LOADING STATE - Show loading message while fetching course data
   if (loading) {
     return (
       <main>
@@ -125,6 +161,7 @@ const CourseUpdate = () => {
     );
   }
 
+  // ERROR STATE - Display authorization or loading errors
   if (errors.length > 0 && !course) {
     return (
       <main>
@@ -141,6 +178,7 @@ const CourseUpdate = () => {
     );
   }
 
+  // NOT FOUND STATE - Course doesn't exist
   if (!course) {
     return (
       <main>
@@ -153,24 +191,20 @@ const CourseUpdate = () => {
     );
   }
 
+  // MAIN RENDER - Display update form
   return (
     <main>
       <div className="wrap">
         <h2>Update Course</h2>
         
+        {/* Display validation errors if any exist */}
         {errors.length > 0 && (
-          <div className="validation--errors">
-            <h3>Validation Errors</h3>
-            <ul>
-              {errors.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </div>
+          <ValidationErrors errors={errors} />
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="main--flex">
+            {/* Left column - Course title, description, and instructor */}
             <div>
               <label htmlFor="title">Course Title</label>
               <input 
@@ -179,7 +213,6 @@ const CourseUpdate = () => {
                 type="text" 
                 value={formData.title}
                 onChange={handleChange}
-                required
               />
 
               <p>By {course.User.firstName} {course.User.lastName}</p>
@@ -190,9 +223,10 @@ const CourseUpdate = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                required
               ></textarea>
             </div>
+            
+            {/* Right column - Estimated time and materials needed */}
             <div>
               <label htmlFor="estimatedTime">Estimated Time</label>
               <input 
@@ -214,6 +248,8 @@ const CourseUpdate = () => {
               ></textarea>
             </div>
           </div>
+          
+          {/* Form action buttons */}
           <button className="button" type="submit" disabled={submitting}>
             {submitting ? 'Updating Course...' : 'Update Course'}
           </button>
