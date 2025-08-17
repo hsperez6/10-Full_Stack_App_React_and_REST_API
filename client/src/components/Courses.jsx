@@ -6,9 +6,8 @@ import UserContext from "../context/UserContext.jsx";
  * Courses Component
  * 
  * Main component that displays a list of all available courses in a grid layout.
- * This component handles authentication checks, fetches courses from the API,
- * and provides navigation to individual course details and course creation.
- * Only authenticated users can access this component.
+ * This component fetches courses from the API and provides navigation to individual
+ * course details and course creation. Authentication is handled by PrivateRoute wrapper.
  */
 const Courses = () => {
   // Get authenticated user data from UserContext
@@ -23,18 +22,12 @@ const Courses = () => {
   const [error, setError] = useState(null);          // Error state for error handling
 
   /**
-   * useEffect hook to handle authentication and course fetching
-   * Redirects unauthenticated users to signin page
-   * Fetches courses data when component mounts or user changes
+   * useEffect hook to fetch courses when component mounts
+   * Since authentication is handled by PrivateRoute, we can directly fetch courses
    */
   useEffect(() => {
-    // Check if user is authenticated, redirect to signin if not
-    if (!user || !user.credentials) {
-      navigate('/signin');
-      return;
-    }
     fetchCourses();
-  }, [user, navigate]);
+  }, []);
 
   /**
    * Fetches all courses from the API
@@ -46,6 +39,14 @@ const Courses = () => {
       const response = await fetch("/api/courses");
 
       if (!response.ok) {
+        if (response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
+        if (response.status === 500) {
+          navigate('/error');
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

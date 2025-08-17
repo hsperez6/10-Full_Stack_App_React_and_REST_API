@@ -9,8 +9,9 @@ import ValidationErrors from "./ValidationErrors.jsx";
  * CourseCreate Component
  * 
  * This component renders a form for authenticated users to create new courses.
- * It includes form validation, error handling, and redirects unauthenticated users.
+ * It includes form validation, error handling, and form submission to the API.
  * The form collects course title, description, estimated time, and materials needed.
+ * Authentication is handled by PrivateRoute wrapper.
  */
 const CourseCreate = () => {
   // Get authenticated user data from UserContext
@@ -27,12 +28,6 @@ const CourseCreate = () => {
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
-
-  // Redirect if user is not authenticated
-  if (!user || !user.credentials) {
-    navigate("/signin");
-    return null;
-  }
 
   /**
    * Handle input field changes
@@ -73,6 +68,14 @@ const CourseCreate = () => {
         // Course created successfully, redirect to courses list
         navigate("/");
       } else {
+        if (response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
+        if (response.status === 500) {
+          navigate('/error');
+          return;
+        }
         // Handle API error responses
         const errorData = await response.json();
         if (errorData.errors) {

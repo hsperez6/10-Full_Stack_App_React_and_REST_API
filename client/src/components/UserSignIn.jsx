@@ -1,5 +1,5 @@
 import React, { useRef, useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import UserContext from "../context/UserContext.jsx";
 import ValidationErrors from "./ValidationErrors.jsx";
 
@@ -10,8 +10,8 @@ import "../global.css";
  * 
  * Form component that handles user authentication by collecting email and password.
  * This component manages form state, handles authentication through UserContext,
- * displays validation errors, and redirects users upon successful sign-in.
- * Uses useRef for form inputs to avoid unnecessary re-renders.
+ * displays validation errors, and redirects users to their intended destination
+ * after successful sign-in. Uses useRef for form inputs to avoid unnecessary re-renders.
  */
 const UserSignIn = () => {
   // Get authentication actions from UserContext
@@ -27,6 +27,9 @@ const UserSignIn = () => {
 
   // Navigation function for redirects
   const navigate = useNavigate();
+  
+  // Get location to access intended destination from navigation state
+  const location = useLocation();
 
   /**
    * Handles form submission for user authentication
@@ -43,8 +46,9 @@ const UserSignIn = () => {
       const result = await actions.signIn(emailAddress.current.value, password.current.value);
       
       if (result.success) {
-        // Sign in successful, redirect to courses list
-        navigate("/");
+        // Sign in successful, redirect to intended destination or default to courses list
+        const intendedDestination = location.state?.from || "/";
+        navigate(intendedDestination);
       } else {
         // Sign in failed, show error message from API
         setErrors([result.message]);

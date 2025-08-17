@@ -65,6 +65,14 @@ const UserSignUp = () => {
           setErrors([`User created successfully, but sign in failed: ${signInResult.message}`]);
         }
       } else {
+        if (response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
+        if (response.status === 500) {
+          navigate('/error');
+          return;
+        }
         // Handle API error responses
         const errorData = await response.json();
         if (errorData.errors) {

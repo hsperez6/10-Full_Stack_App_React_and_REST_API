@@ -1,11 +1,17 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
+import { 
+  storeUserInCookies, 
+  getUserCredentialsFromCookies, 
+  getUserStateFromCookies, 
+  clearUserCookies 
+} from "../utils/cookieUtils.js";
 
 /**
  * UserContext
  * 
  * React Context that provides user authentication state and actions throughout the application.
  * This context manages the current user's authentication status, credentials, and provides
- * methods for signing in and signing out users.
+ * methods for signing in and signing out users. User state is persisted using HTTP cookies.
  */
 const UserContext = createContext(null);
 
@@ -14,6 +20,7 @@ const UserContext = createContext(null);
  * 
  * Provider component that wraps the application and provides user authentication context.
  * This component manages user state and provides authentication actions to all child components.
+ * User state is automatically restored from cookies on page refresh.
  * 
  * @param {Object} props - Component props
  * @param {React.ReactNode} props.children - Child components that will have access to the context
@@ -22,10 +29,54 @@ export const UserProvider = (props) => {
   
   // STATE MANAGEMENT
   const [user, setUser] = useState(null);  // Current authenticated user or null if not signed in
+  const [isInitialized, setIsInitialized] = useState(false); // Track if cookies have been checked
+
+  /**
+   * Restores user state from cookies on component mount
+   * This ensures user authentication persists across page refreshes
+   */
+  useEffect(() => {
+    const restoreUserFromCookies = async () => {
+      try {
+        // Check if user credentials cookie exists
+        const storedCredentials = getUserCredentialsFromCookies();
+        const storedUserState = getUserStateFromCookies();
+        
+        if (storedCredentials && storedUserState) {
+          // Validate stored credentials by making an API call
+          const response = await fetch('/api/users', {
+            headers: {
+              'Authorization': `Basic ${storedCredentials}`
+            }
+          });
+          
+          if (response.ok) {
+            // Credentials are still valid, restore user state
+            setUser({
+              ...storedUserState,
+              credentials: storedCredentials
+            });
+          } else {
+            // Credentials are invalid, clear cookies
+            clearUserCookies();
+          }
+        }
+      } catch (error) {
+        console.error('Error restoring user from cookies:', error);
+        // Clear invalid cookies on error
+        clearUserCookies();
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    restoreUserFromCookies();
+  }, []);
 
   /**
    * Authenticates a user with email and password
    * Creates Basic Auth credentials and validates them against the API
+   * Stores user state in cookies for persistence
    * 
    * @param {string} emailAddress - User's email address
    * @param {string} password - User's password
@@ -56,10 +107,23 @@ export const UserProvider = (props) => {
           credentials                         // Encoded credentials for future API calls
         };
         
+        // Store user data in cookies for persistence
+        storeUserInCookies(authenticatedUser, credentials);
+        
         // Update user state with authenticated user information
         setUser(authenticatedUser);
         return { success: true };
       } else {
+        if (response.status === 403) {
+          // Redirect to forbidden page for authorization errors
+          window.location.href = '/forbidden';
+          return { success: false, message: 'Access forbidden' };
+        }
+        if (response.status === 500) {
+          // Redirect to error page for server errors
+          window.location.href = '/error';
+          return { success: false, message: 'Server error occurred' };
+        }
         // Authentication failed - handle API error response
         const errorData = await response.json();
         return { 
@@ -79,10 +143,11 @@ export const UserProvider = (props) => {
 
   /**
    * Signs out the current user
-   * Clears user state and removes authentication
+   * Clears user state and removes authentication cookies
    */
   const signOutUser = () => {
     setUser(null);
+    clearUserCookies();
   };
 
   // Provide context value to all child components
@@ -90,6 +155,7 @@ export const UserProvider = (props) => {
     <UserContext.Provider
       value={{
         user,                    // Current user state (null if not authenticated)
+        isInitialized,          // Whether cookies have been checked and user state restored
         actions: {               // Authentication action methods
           signIn: signInUser,    // Function to sign in a user
           signOut: signOutUser,  // Function to sign out a user

@@ -7,9 +7,9 @@ import ValidationErrors from "./ValidationErrors.jsx";
  * CourseUpdate Component
  * 
  * Form component that allows authenticated users to update existing courses.
- * This component handles authentication checks, fetches the current course data,
- * validates user ownership, and provides form submission with error handling.
- * Only course owners can update their courses.
+ * This component fetches the current course data, validates user ownership,
+ * and provides form submission with error handling. Only course owners can
+ * update their courses. Authentication is handled by PrivateRoute wrapper.
  */
 const CourseUpdate = () => {
   // Get authenticated user data from UserContext
@@ -32,22 +32,15 @@ const CourseUpdate = () => {
   const navigate = useNavigate();                                // Navigation function
 
   /**
-   * useEffect hook to handle authentication and course fetching
-   * Redirects unauthenticated users to signin page
-   * Fetches course data when component mounts or user/course ID changes
+   * useEffect hook to fetch course data when component mounts or course ID changes
+   * Since authentication is handled by PrivateRoute, we can directly fetch course data
    */
   useEffect(() => {
-    // Check if user is authenticated, redirect to signin if not
-    if (!user || !user.credentials) {
-      navigate('/signin');
-      return;
-    }
-    
     // Fetch course data if course ID is available
     if (id) {
       fetchCourse();
     }
-  }, [user, navigate, id]);
+  }, [id]);
 
   /**
    * Fetches course data from the API and populates the form
@@ -64,7 +57,16 @@ const CourseUpdate = () => {
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Course not found');
+          navigate('/notfound');
+          return;
+        }
+        if (response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
+        if (response.status === 500) {
+          navigate('/error');
+          return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -74,8 +76,7 @@ const CourseUpdate = () => {
       
       // Check if the current user owns this course
       if (data.course.userId !== user.id) {
-        setErrors(['You are not authorized to update this course.']);
-        setLoading(false);
+        navigate('/forbidden');
         return;
       }
       
@@ -132,6 +133,14 @@ const CourseUpdate = () => {
         // Course updated successfully, redirect to course detail
         navigate(`/courses/${id}`);
       } else {
+        if (response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
+        if (response.status === 500) {
+          navigate('/error');
+          return;
+        }
         const errorData = await response.json();
         if (errorData.errors) {
           setErrors(errorData.errors);
@@ -161,7 +170,7 @@ const CourseUpdate = () => {
     );
   }
 
-  // ERROR STATE - Display authorization or loading errors
+  // ERROR STATE - Display loading errors only
   if (errors.length > 0 && !course) {
     return (
       <main>
@@ -178,17 +187,10 @@ const CourseUpdate = () => {
     );
   }
 
-  // NOT FOUND STATE - Course doesn't exist
+  // NOT FOUND STATE - Redirect to notfound page if course doesn't exist
   if (!course) {
-    return (
-      <main>
-        <div className="wrap">
-          <h2>Update Course</h2>
-          <div>Course not found</div>
-          <button onClick={() => navigate('/')}>Return to List</button>
-        </div>
-      </main>
-    );
+    navigate('/notfound');
+    return null;
   }
 
   // MAIN RENDER - Display update form

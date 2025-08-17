@@ -7,8 +7,8 @@ import UserContext from "../context/UserContext.jsx";
  * 
  * Displays detailed information about a specific course including title, description,
  * estimated time, materials needed, and instructor information. This component
- * handles authentication checks, course fetching, and provides update/delete
- * functionality for course owners.
+ * handles course fetching and provides update/delete functionality for course owners.
+ * Authentication is handled by PrivateRoute wrapper.
  */
 const CourseDetail = () => {
   // Get authenticated user data from UserContext
@@ -24,22 +24,15 @@ const CourseDetail = () => {
   const navigate = useNavigate();                    // Navigation function
 
   /**
-   * useEffect hook to handle authentication and course fetching
-   * Redirects unauthenticated users to signin page
-   * Fetches course data when component mounts or user/course ID changes
+   * useEffect hook to fetch course data when component mounts or course ID changes
+   * Since authentication is handled by PrivateRoute, we can directly fetch course data
    */
   useEffect(() => {
-    // Check if user is authenticated, redirect to signin if not
-    if (!user || !user.credentials) {
-      navigate('/signin');
-      return;
-    }
-    
     // Fetch course data if course ID is available
     if (id) {
       fetchCourse();
     }
-  }, [user, navigate, id]);
+  }, [id]);
 
   /**
    * Fetches course data from the API
@@ -56,7 +49,16 @@ const CourseDetail = () => {
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Course not found');
+          navigate('/notfound');
+          return;
+        }
+        if (response.status === 403) {
+          navigate('/forbidden');
+          return;
+        }
+        if (response.status === 500) {
+          navigate('/error');
+          return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -90,6 +92,14 @@ const CourseDetail = () => {
         if (response.ok) {
           navigate('/');
         } else {
+          if (response.status === 403) {
+            navigate('/forbidden');
+            return;
+          }
+          if (response.status === 500) {
+            navigate('/error');
+            return;
+          }
           const errorData = await response.json();
           alert(errorData.message || 'Failed to delete course');
         }
@@ -125,17 +135,10 @@ const CourseDetail = () => {
     );
   }
 
-  // NOT FOUND STATE - Course doesn't exist
+  // NOT FOUND STATE - Redirect to notfound page if course doesn't exist
   if (!course) {
-    return (
-      <main>
-        <div className="wrap">
-          <h2>Course Detail</h2>
-          <div>Course not found</div>
-          <button onClick={() => navigate('/')}>Return to List</button>
-        </div>
-      </main>
-    );
+    navigate('/notfound');
+    return null;
   }
 
   // MAIN RENDER - Display course details and action buttons

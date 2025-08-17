@@ -9,10 +9,29 @@ import UserContext from "../context/UserContext.jsx";
  * This component conditionally renders different navigation options based on user
  * authentication status. Authenticated users see a welcome message and sign out link,
  * while unauthenticated users see sign up and sign in links.
+ * The component waits for user state to be initialized from cookies before rendering.
  */
 const Header = () => {
-  // Get user authentication status from UserContext
-  const { user } = useContext(UserContext);
+  // Get user authentication status and initialization state from UserContext
+  const { user, isInitialized } = useContext(UserContext);
+
+  // Don't render navigation until user state is initialized from cookies
+  if (!isInitialized) {
+    return (
+      <header>
+        <div className="wrap header--flex">
+          <h1 className="header--logo">
+            <Link to="/">Courses</Link>
+          </h1>
+                  <nav>
+          <ul className="header--signedout">
+            <li>Loading...</li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    );
+  }
 
   return (
     <header>
