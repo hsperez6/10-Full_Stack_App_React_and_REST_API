@@ -2,9 +2,9 @@ import React from 'react';
 
 const Forbidden = () => {
   return (
-    <div>
-      <h1>Access Denied</h1>
-      <p>You are not authorized to access this page.</p>
+    <div className="wrap">
+      <h2>Forbidden</h2>
+      <p>Oh oh! You can't access this page.</p>
     </div>
   );
 };

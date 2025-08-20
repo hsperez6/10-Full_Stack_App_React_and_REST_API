@@ -2,7 +2,7 @@
 /*********************************************************
  * LOAD MODULES
 *********************************************************/
-const cors = require('cors');  
+const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
 const { sequelize, User, Course } = require('./models');
@@ -24,7 +24,7 @@ app.use(cors());
 // Setup request body JSON parsing.
 app.use(express.json());
 
-// setup morgan 
+// setup morgan
 app.use(morgan('dev'));
 
 
@@ -40,7 +40,7 @@ app.use(morgan('dev'));
     console.log('Sequelize models sync successful');
   } catch (error) {
     console.error('Unable to connect and sync to the database:', error);
-  };
+  }
 
 })();
 
@@ -73,7 +73,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   if (enableGlobalErrorLogging) {
     console.error(`Global error handler: ${JSON.stringify(err.stack)}`);
-  };
+  }
   res.status(err.status || 500).json({
     message: err.message,
     error: {},

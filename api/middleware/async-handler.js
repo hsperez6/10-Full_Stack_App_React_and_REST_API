@@ -7,5 +7,5 @@ exports.asyncHandler = (cb) => {
       // Forward error to the global error handler
       next(error);
     }
-  }
-}
+  };
+};

@@ -1,13 +1,13 @@
-import React, { useRef, useContext, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import UserContext from "../context/UserContext.jsx";
-import ValidationErrors from "./ValidationErrors.jsx";
+import React, { useRef, useContext, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import UserContext from '../context/UserContext.jsx';
+import ValidationErrors from './ValidationErrors.jsx';
 
-import "../global.css";
+import '../global.css';
 
 /**
  * UserSignIn Component
- * 
+ *
  * Form component that handles user authentication by collecting email and password.
  * This component manages form state, handles authentication through UserContext,
  * displays validation errors, and redirects users to their intended destination
@@ -16,7 +16,7 @@ import "../global.css";
 const UserSignIn = () => {
   // Get authentication actions from UserContext
   const { actions } = useContext(UserContext);
-  
+
   // STATE MANAGEMENT
   const [errors, setErrors] = useState([]);          // Validation and authentication errors
   const [loading, setLoading] = useState(false);     // Loading state during form submission
@@ -27,7 +27,7 @@ const UserSignIn = () => {
 
   // Navigation function for redirects
   const navigate = useNavigate();
-  
+
   // Get location to access intended destination from navigation state
   const location = useLocation();
 
@@ -44,10 +44,10 @@ const UserSignIn = () => {
     try {
       // Attempt to sign in using credentials from form
       const result = await actions.signIn(emailAddress.current.value, password.current.value);
-      
+
       if (result.success) {
         // Sign in successful, redirect to intended destination or default to courses list
-        const intendedDestination = location.state?.from || "/";
+        const intendedDestination = location.state?.from || '/';
         navigate(intendedDestination);
       } else {
         // Sign in failed, show error message from API
@@ -69,13 +69,13 @@ const UserSignIn = () => {
    */
   const handleCancel = (event) => {
     event.preventDefault();
-    navigate("/");
+    navigate('/');
   };
 
   return (
     <div className="form--centered">
       <h2>Sign In</h2>
-      
+
       {/* Display validation errors if any exist */}
       <ValidationErrors errors={errors} />
 
@@ -83,16 +83,16 @@ const UserSignIn = () => {
         {/* Email address input field */}
         <label htmlFor="emailAddress">Email Address</label>
         <input id="emailAddress" name="emailAddress" type="email" ref={emailAddress} />
-        
+
         {/* Password input field */}
         <label htmlFor="password">Password</label>
         <input id="password" name="password" type="password" ref={password} />
-        
+
         {/* Submit button - disabled during form submission */}
         <button className="button" type="submit" onClick={handleSubmit} disabled={loading}>
           {loading ? 'Signing In...' : 'Sign In'}
         </button>
-        
+
         {/* Cancel button - redirects to courses list */}
         <button
           className="button button-secondary"
@@ -102,10 +102,10 @@ const UserSignIn = () => {
           Cancel
         </button>
       </form>
-      
+
       {/* Link to sign up page for new users */}
       <p>
-        Don't have a user account? Click here to{" "}
+        Don't have a user account? Click here to{' '}
         <a href="/signup">sign up</a>!
       </p>
     </div>

@@ -21,7 +21,7 @@ exports.authenticateUser = async (req, res, next) => {
 
   if (credentials) {
     // Find user in database using the email provided in credentials.name
-    const user = await User.findOne({ where: {emailAddress: credentials.name} });
+    const user = await User.findOne({ where: { emailAddress: credentials.name } });
 
     // If a user is found, compare password from credentials.pass with user.password from db
     if (user) {

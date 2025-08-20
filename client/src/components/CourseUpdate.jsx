@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import UserContext from "../context/UserContext.jsx";
-import ValidationErrors from "./ValidationErrors.jsx";
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import UserContext from '../context/UserContext.jsx';
+import ValidationErrors from './ValidationErrors.jsx';
 
 /**
  * CourseUpdate Component
- * 
+ *
  * Form component that allows authenticated users to update existing courses.
  * This component fetches the current course data, validates user ownership,
  * and provides form submission with error handling. Only course owners can
@@ -14,7 +14,7 @@ import ValidationErrors from "./ValidationErrors.jsx";
 const CourseUpdate = () => {
   // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
-  
+
   // STATE MANAGEMENT
   const [course, setCourse] = useState(null);                    // Current course data
   const [formData, setFormData] = useState({                     // Form input values
@@ -26,7 +26,7 @@ const CourseUpdate = () => {
   const [errors, setErrors] = useState([]);                      // Validation errors
   const [loading, setLoading] = useState(true);                  // Loading state for initial fetch
   const [submitting, setSubmitting] = useState(false);           // Loading state for form submission
-  
+
   // ROUTING AND NAVIGATION
   const { id } = useParams();                                    // Course ID from URL parameters
   const navigate = useNavigate();                                // Navigation function
@@ -43,21 +43,36 @@ const CourseUpdate = () => {
   }, [id]);
 
   /**
+   * useEffect hook to handle redirects when course data is not available
+   * Redirects to /notfound if course fetch completed but no course was returned
+   */
+  useEffect(() => {
+    // If loading is false and no course was returned, redirect to notfound
+    if (!loading && !course && errors.length === 0) {
+      navigate('/notfound');
+    }
+  }, [loading, course, errors, navigate]);
+
+  /**
    * Fetches course data from the API and populates the form
    * Validates that the current user owns the course before allowing updates
    */
   const fetchCourse = async () => {
     try {
       setLoading(true);
+      setErrors([]);
+
       const response = await fetch(`/api/courses/${id}`, {
         headers: {
           'Authorization': `Basic ${user.credentials}`
         }
       });
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          navigate('/notfound');
+          // Course not found, set course to null to trigger redirect
+          setCourse(null);
+          setLoading(false);
           return;
         }
         if (response.status === 403) {
@@ -70,16 +85,24 @@ const CourseUpdate = () => {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
+
+      // Check if the API actually returned course data
+      if (!data.course) {
+        setCourse(null);
+        setLoading(false);
+        return;
+      }
+
       setCourse(data.course);
-      
+
       // Check if the current user owns this course
       if (data.course.userId !== user.id) {
         navigate('/forbidden');
         return;
       }
-      
+
       // Populate form with current course data
       setFormData({
         title: data.course.title || '',
@@ -187,10 +210,16 @@ const CourseUpdate = () => {
     );
   }
 
-  // NOT FOUND STATE - Redirect to notfound page if course doesn't exist
+  // If no course data is available, show loading or wait for redirect
   if (!course) {
-    navigate('/notfound');
-    return null;
+    return (
+      <main>
+        <div className="wrap">
+          <h2>Update Course</h2>
+          <div>Loading course...</div>
+        </div>
+      </main>
+    );
   }
 
   // MAIN RENDER - Display update form
@@ -198,7 +227,7 @@ const CourseUpdate = () => {
     <main>
       <div className="wrap">
         <h2>Update Course</h2>
-        
+
         {/* Display validation errors if any exist */}
         {errors.length > 0 && (
           <ValidationErrors errors={errors} />
@@ -209,10 +238,10 @@ const CourseUpdate = () => {
             {/* Left column - Course title, description, and instructor */}
             <div>
               <label htmlFor="title">Course Title</label>
-              <input 
-                id="title" 
-                name="title" 
-                type="text" 
+              <input
+                id="title"
+                name="title"
+                type="text"
                 value={formData.title}
                 onChange={handleChange}
               />
@@ -220,29 +249,29 @@ const CourseUpdate = () => {
               <p>By {course.User.firstName} {course.User.lastName}</p>
 
               <label htmlFor="description">Course Description</label>
-              <textarea 
-                id="description" 
+              <textarea
+                id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
               ></textarea>
             </div>
-            
+
             {/* Right column - Estimated time and materials needed */}
             <div>
               <label htmlFor="estimatedTime">Estimated Time</label>
-              <input 
-                id="estimatedTime" 
-                name="estimatedTime" 
-                type="text" 
+              <input
+                id="estimatedTime"
+                name="estimatedTime"
+                type="text"
                 value={formData.estimatedTime}
                 onChange={handleChange}
                 placeholder="e.g., 14 hours"
               />
 
               <label htmlFor="materialsNeeded">Materials Needed</label>
-              <textarea 
-                id="materialsNeeded" 
+              <textarea
+                id="materialsNeeded"
                 name="materialsNeeded"
                 value={formData.materialsNeeded}
                 onChange={handleChange}
@@ -250,14 +279,14 @@ const CourseUpdate = () => {
               ></textarea>
             </div>
           </div>
-          
+
           {/* Form action buttons */}
           <button className="button" type="submit" disabled={submitting}>
             {submitting ? 'Updating Course...' : 'Update Course'}
           </button>
-          <button 
-            className="button button-secondary" 
-            type="button" 
+          <button
+            className="button button-secondary"
+            type="button"
             onClick={() => navigate(`/courses/${id}`)}
           >
             Cancel

@@ -13,7 +13,7 @@ export const USER_STATE_COOKIE_KEY = 'user_state';
 
 /**
  * Stores user credentials and state in cookies
- * 
+ *
  * @param {Object} userData - User data to store
  * @param {string} credentials - Encoded credentials
  */
@@ -21,7 +21,7 @@ export const storeUserInCookies = (userData, credentials) => {
   try {
     // Store encoded credentials
     Cookies.set(USER_COOKIE_KEY, credentials, COOKIE_OPTIONS);
-    
+
     // Store user state (excluding credentials for security)
     const userStateForStorage = {
       id: userData.id,
@@ -30,7 +30,7 @@ export const storeUserInCookies = (userData, credentials) => {
       lastName: userData.lastName
     };
     Cookies.set(USER_STATE_COOKIE_KEY, JSON.stringify(userStateForStorage), COOKIE_OPTIONS);
-    
+
     return true;
   } catch (error) {
     console.error('Error storing user in cookies:', error);
@@ -40,7 +40,7 @@ export const storeUserInCookies = (userData, credentials) => {
 
 /**
  * Retrieves user credentials from cookies
- * 
+ *
  * @returns {string|null} Encoded credentials or null if not found
  */
 export const getUserCredentialsFromCookies = () => {
@@ -54,7 +54,7 @@ export const getUserCredentialsFromCookies = () => {
 
 /**
  * Retrieves user state from cookies
- * 
+ *
  * @returns {Object|null} User state object or null if not found
  */
 export const getUserStateFromCookies = () => {
@@ -86,7 +86,7 @@ export const clearUserCookies = () => {
 
 /**
  * Checks if user cookies exist and are valid
- * 
+ *
  * @returns {boolean} True if cookies exist, false otherwise
  */
 export const hasValidUserCookies = () => {
@@ -102,7 +102,7 @@ export const hasValidUserCookies = () => {
 
 /**
  * Gets cookie expiration date
- * 
+ *
  * @returns {Date} Date when cookies will expire
  */
 export const getCookieExpirationDate = () => {

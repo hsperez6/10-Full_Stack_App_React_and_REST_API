@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import UserContext from "../context/UserContext.jsx";
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import UserContext from '../context/UserContext.jsx';
 
 /**
  * CourseDetail Component
- * 
+ *
  * Displays detailed information about a specific course including title, description,
  * estimated time, materials needed, and instructor information. This component
  * handles course fetching and provides update/delete functionality for course owners.
@@ -13,12 +14,12 @@ import UserContext from "../context/UserContext.jsx";
 const CourseDetail = () => {
   // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
-  
+
   // STATE MANAGEMENT
   const [course, setCourse] = useState(null);        // Current course data
   const [loading, setLoading] = useState(true);      // Loading state indicator
   const [error, setError] = useState(null);          // Error state for error handling
-  
+
   // ROUTING AND NAVIGATION
   const { id } = useParams();                        // Course ID from URL parameters
   const navigate = useNavigate();                    // Navigation function
@@ -35,21 +36,36 @@ const CourseDetail = () => {
   }, [id]);
 
   /**
+   * useEffect hook to handle redirects when course data is not available
+   * Redirects to /notfound if course fetch completed but no course was returned
+   */
+  useEffect(() => {
+    // If loading is false and no course was returned, redirect to notfound
+    if (!loading && !course && !error) {
+      navigate('/notfound');
+    }
+  }, [loading, course, error, navigate]);
+
+  /**
    * Fetches course data from the API
    * Handles authentication headers and error responses
    */
   const fetchCourse = async () => {
     try {
       setLoading(true);
+      setError(null);
+
       const response = await fetch(`/api/courses/${id}`, {
         headers: {
           'Authorization': `Basic ${user.credentials}`
         }
       });
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          navigate('/notfound');
+          // Course not found, set course to null to trigger redirect
+          setCourse(null);
+          setLoading(false);
           return;
         }
         if (response.status === 403) {
@@ -62,8 +78,16 @@ const CourseDetail = () => {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
+
+      // Check if the API actually returned course data
+      if (!data.course) {
+        setCourse(null);
+        setLoading(false);
+        return;
+      }
+
       setCourse(data.course);
       setError(null);
     } catch (err) {
@@ -135,10 +159,16 @@ const CourseDetail = () => {
     );
   }
 
-  // NOT FOUND STATE - Redirect to notfound page if course doesn't exist
+  // If no course data is available, show loading or wait for redirect
   if (!course) {
-    navigate('/notfound');
-    return null;
+    return (
+      <main>
+        <div className="wrap">
+          <h2>Course Detail</h2>
+          <div>Loading course...</div>
+        </div>
+      </main>
+    );
   }
 
   // MAIN RENDER - Display course details and action buttons
@@ -176,22 +206,22 @@ const CourseDetail = () => {
                 <h4 className="course--name">{course.title}</h4>
                 <p>By {course.User.firstName} {course.User.lastName}</p>
 
-                <p>{course.description}</p>
+                <div className="course--description">
+                  <ReactMarkdown>{course.description}</ReactMarkdown>
+                </div>
               </div>
-              
+
               {/* Right column - Estimated time and materials needed */}
               <div>
                 <h3 className="course--detail--title">ESTIMATED TIME</h3>
                 <p>{course.estimatedTime}</p>
 
                 <h3 className="course--detail--title">MATERIALS NEEDED</h3>
-                {/* Display materials as list if available, otherwise show "No materials listed" */}
+                {/* Display materials as markdown if available, otherwise show "No materials listed" */}
                 {course.materialsNeeded ? (
-                  <ul className="course--detail--list">
-                    {course.materialsNeeded.split('\n').map((material, index) => (
-                      <li key={index}>{material.trim()}</li>
-                    ))}
-                  </ul>
+                  <div className="course--materials">
+                    <ReactMarkdown>{course.materialsNeeded}</ReactMarkdown>
+                  </div>
                 ) : (
                   <p>No materials listed</p>
                 )}

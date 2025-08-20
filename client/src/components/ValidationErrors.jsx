@@ -1,13 +1,13 @@
-import React from "react";
+import React from 'react';
 
 /**
  * ValidationErrors Component
- * 
+ *
  * Utility component that displays validation error messages in a consistent format.
  * This component conditionally renders error messages only when errors exist,
  * returning null when there are no errors to display. It's used throughout
  * the application to show form validation errors and API error responses.
- * 
+ *
  * @param {Object} props - Component props
  * @param {Array} props.errors - Array of error messages to display
  * @returns {JSX.Element|null} Error display component or null if no errors

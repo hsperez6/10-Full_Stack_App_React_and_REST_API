@@ -1,10 +1,10 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import UserContext from "../context/UserContext.jsx";
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import UserContext from '../context/UserContext.jsx';
 
 /**
  * Header Component
- * 
+ *
  * Navigation header component that displays the application logo and navigation menu.
  * This component conditionally renders different navigation options based on user
  * authentication status. Authenticated users see a welcome message and sign out link,
@@ -23,13 +23,13 @@ const Header = () => {
           <h1 className="header--logo">
             <Link to="/">Courses</Link>
           </h1>
-                  <nav>
-          <ul className="header--signedout">
-            <li>Loading...</li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+          <nav>
+            <ul className="header--signedout">
+              <li>Loading...</li>
+            </ul>
+          </nav>
+        </div>
+      </header>
     );
   }
 
@@ -40,7 +40,7 @@ const Header = () => {
         <h1 className="header--logo">
           <Link to="/">Courses</Link>
         </h1>
-        
+
         {/* Navigation menu - conditionally rendered based on auth status */}
         <nav>
           {user ? (

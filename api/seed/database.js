@@ -4,20 +4,20 @@ const bcryptjs = require('bcryptjs');
 const Context = require('./context');
 
 class Database {
-  constructor(seedData, enableLogging) {
+  constructor (seedData, enableLogging) {
     this.courses = seedData.courses;
     this.users = seedData.users;
     this.enableLogging = enableLogging;
     this.context = new Context('fsjstd-restapi.db', enableLogging);
   }
 
-  log(message) {
+  log (message) {
     if (this.enableLogging) {
       console.info(message);
     }
   }
 
-  tableExists(tableName) {
+  tableExists (tableName) {
     this.log(`Checking if the ${tableName} table exists...`);
 
     return this.context
@@ -30,7 +30,7 @@ class Database {
       `, tableName);
   }
 
-  createUser(user) {
+  createUser (user) {
     return this.context
       .execute(`
         INSERT INTO Users
@@ -44,7 +44,7 @@ class Database {
       user.password);
   }
 
-  createCourse(course) {
+  createCourse (course) {
     return this.context
       .execute(`
         INSERT INTO Courses
@@ -59,7 +59,7 @@ class Database {
       course.materialsNeeded);
   }
 
-  async hashUserPasswords(users) {
+  async hashUserPasswords (users) {
     const usersWithHashedPasswords = [];
 
     for (const user of users) {
@@ -70,19 +70,19 @@ class Database {
     return usersWithHashedPasswords;
   }
 
-  async createUsers(users) {
+  async createUsers (users) {
     for (const user of users) {
       await this.createUser(user);
     }
   }
 
-  async createCourses(courses) {
+  async createCourses (courses) {
     for (const course of courses) {
       await this.createCourse(course);
     }
   }
 
-  async init() {
+  async init () {
     const userTableExists = await this.tableExists('Users');
 
     if (userTableExists) {

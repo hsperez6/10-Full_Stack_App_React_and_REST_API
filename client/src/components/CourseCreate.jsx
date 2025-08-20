@@ -1,13 +1,13 @@
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // COMPONENTS
-import UserContext from "../context/UserContext.jsx";
-import ValidationErrors from "./ValidationErrors.jsx";
+import UserContext from '../context/UserContext.jsx';
+import ValidationErrors from './ValidationErrors.jsx';
 
 /**
  * CourseCreate Component
- * 
+ *
  * This component renders a form for authenticated users to create new courses.
  * It includes form validation, error handling, and form submission to the API.
  * The form collects course title, description, estimated time, and materials needed.
@@ -16,17 +16,17 @@ import ValidationErrors from "./ValidationErrors.jsx";
 const CourseCreate = () => {
   // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
-  
+
   // STATE
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    estimatedTime: "",
-    materialsNeeded: "",
+    title: '',
+    description: '',
+    estimatedTime: '',
+    materialsNeeded: '',
   });
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   /**
@@ -54,10 +54,10 @@ const CourseCreate = () => {
 
     try {
       // Send POST request to create new course
-      const response = await fetch("/api/courses", {
-        method: "POST",
+      const response = await fetch('/api/courses', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           // Include user credentials for authentication
           Authorization: `Basic ${user.credentials}`,
         },
@@ -66,7 +66,7 @@ const CourseCreate = () => {
 
       if (response.ok) {
         // Course created successfully, redirect to courses list
-        navigate("/");
+        navigate('/');
       } else {
         if (response.status === 403) {
           navigate('/forbidden');
@@ -83,13 +83,13 @@ const CourseCreate = () => {
           setErrors(errorData.errors);
         } else {
           // Set generic error message if no specific errors provided
-          setErrors(["Failed to create course. Please try again."]);
+          setErrors(['Failed to create course. Please try again.']);
         }
       }
     } catch (err) {
       // Handle network or other errors
-      console.error("Error creating course:", err);
-      setErrors(["Failed to create course. Please try again."]);
+      console.error('Error creating course:', err);
+      setErrors(['Failed to create course. Please try again.']);
     } finally {
       // Reset loading state
       setLoading(false);
@@ -114,7 +114,7 @@ const CourseCreate = () => {
                   value={formData.title}
                   onChange={handleChange}
                 />
-                
+
                 <p>By {user.firstName} {user.lastName}</p>
 
                 <label htmlFor="description">Course Description</label>
@@ -146,18 +146,18 @@ const CourseCreate = () => {
                 ></textarea>
               </div>
             </div>
-            
+
             {/* Form action buttons */}
             {/* Submit button - disabled during form submission */}
             <button className="button" type="submit" disabled={loading}>
-              {loading ? "Creating Course..." : "Create Course"}
+              {loading ? 'Creating Course...' : 'Create Course'}
             </button>
-            
+
             {/* Cancel button - navigates back to courses list */}
             <button
               className="button button-secondary"
               type="button"
-              onClick={() => navigate("/")}
+              onClick={() => navigate('/')}
             >
               Cancel
             </button>

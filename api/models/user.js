@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate (models) {
       // define association here
     }
   }
@@ -32,23 +32,23 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
-    lastName: { 
+    lastName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'A last name is required'
-        }, 
+          msg: 'A last name is required',
+        },
         notEmpty: {
-          msg: 'Please provide your last name'
-        }
-      }
+          msg: 'Please provide your last name',
+        },
+      },
     },
-    emailAddress:  {
+    emailAddress: {
       type: DataTypes.STRING,
       // Checks if email account used for creating a new user is not already in the db
       unique: {
-        msg: "An account for this email already exists."
+        msg: 'An account for this email already exists.',
       },
       allowNull: false,
       validate: {
@@ -63,13 +63,13 @@ module.exports = (sequelize, DataTypes) => {
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-      set(val) {
+      set (val) {
         // If password is not null, undefined, or empty, hash the password and set the value
-        if (val && val.length > 0) {          
+        if (val && val.length > 0) {
           const hashedPassword = bcrypt.hashSync(val, 10);
           this.setDataValue('password', hashedPassword);
         }
-      }, 
+      },
       validate: {
         notNull: {
           msg: 'A valid password is required',

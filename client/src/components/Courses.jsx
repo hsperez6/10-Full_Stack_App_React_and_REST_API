@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import UserContext from "../context/UserContext.jsx";
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import UserContext from '../context/UserContext.jsx';
 
 /**
  * Courses Component
- * 
+ *
  * Main component that displays a list of all available courses in a grid layout.
  * This component fetches courses from the API and provides navigation to individual
  * course details and course creation. Authentication is handled by PrivateRoute wrapper.
@@ -12,10 +12,10 @@ import UserContext from "../context/UserContext.jsx";
 const Courses = () => {
   // Get authenticated user data from UserContext
   const { user } = useContext(UserContext);
-  
+
   // ROUTING AND NAVIGATION
   const navigate = useNavigate();
-  
+
   // STATE MANAGEMENT
   const [courses, setCourses] = useState([]);        // Array of course objects
   const [loading, setLoading] = useState(true);      // Loading state indicator
@@ -36,7 +36,7 @@ const Courses = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/courses");
+      const response = await fetch('/api/courses');
 
       if (!response.ok) {
         if (response.status === 403) {
@@ -54,8 +54,8 @@ const Courses = () => {
       setCourses(data.courses);
       setError(null);
     } catch (err) {
-      console.error("Error fetching courses:", err);
-      setError("Failed to load courses. Please try again later.");
+      console.error('Error fetching courses:', err);
+      setError('Failed to load courses. Please try again later.');
     } finally {
       setLoading(false);
     }

@@ -3,22 +3,22 @@
 const sqlite3 = require('sqlite3');
 
 class Context {
-  constructor(filename, enableLogging) {
+  constructor (filename, enableLogging) {
     this.db = new sqlite3.Database(filename);
     this.enableLogging = enableLogging;
   }
 
-  static prepareQuery(text) {
+  static prepareQuery (text) {
     return text
       .replace(/\s+/g, ' ')
       .trim();
   }
 
-  static log(text, params) {
+  static log (text, params) {
     console.info(`Running query: "${text}", with params: ${JSON.stringify(params)}`);
   }
 
-  execute(text, ...params) {
+  execute (text, ...params) {
     const sql = Context.prepareQuery(text);
     if (this.enableLogging) {
       Context.log(sql, params);
@@ -34,7 +34,7 @@ class Context {
     });
   }
 
-  query(text, ...params) {
+  query (text, ...params) {
     const sql = Context.prepareQuery(text);
     if (this.enableLogging) {
       Context.log(sql, params);
@@ -50,11 +50,11 @@ class Context {
     });
   }
 
-  async retrieve(text, ...params) {
+  async retrieve (text, ...params) {
     return this.query(text, ...params);
   }
 
-  async retrieveSingle(text, ...params) {
+  async retrieveSingle (text, ...params) {
     const data = await this.query(text, ...params);
     let record;
     if (data) {
@@ -67,7 +67,7 @@ class Context {
     return record;
   }
 
-  async retrieveValue(text, ...params) {
+  async retrieveValue (text, ...params) {
     const data = await this.query(text, ...params);
     let record;
     let value;
