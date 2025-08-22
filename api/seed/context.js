@@ -1,10 +1,10 @@
 'use strict';
 
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 
 class Context {
   constructor (filename, enableLogging) {
-    this.db = new Database(filename);
+    this.db = new sqlite3.Database(filename);
     this.enableLogging = enableLogging;
   }
 
@@ -23,13 +23,15 @@ class Context {
     if (this.enableLogging) {
       Context.log(sql, params);
     }
-    try {
-      const stmt = this.db.prepare(sql);
-      const result = stmt.run(...params);
-      return Promise.resolve(result);
-    } catch (err) {
-      return Promise.reject(err);
-    }
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, params, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ lastID: this.lastID, changes: this.changes });
+        }
+      });
+    });
   }
 
   query (text, ...params) {
@@ -37,13 +39,15 @@ class Context {
     if (this.enableLogging) {
       Context.log(sql, params);
     }
-    try {
-      const stmt = this.db.prepare(sql);
-      const data = stmt.all(...params);
-      return Promise.resolve(data);
-    } catch (err) {
-      return Promise.reject(err);
-    }
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, params, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
   }
 
   async retrieve (text, ...params) {
