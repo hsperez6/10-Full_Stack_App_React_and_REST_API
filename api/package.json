@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon ./app.js",
+    "start": "node ./app.js",
+    "dev": "nodemon ./app.js",
     "seed": "cross-env DB_ENABLE_LOGGING=true node './seed'",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix"
@@ -21,7 +22,7 @@
   "dependencies": {
     "basic-auth": "^2.0.1",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^12.2.0",
+    "better-sqlite3": "^8.7.0",
     "cors": "^2.8.5",
     "cross-env": "^7.0.2",
     "express": "^4.17.1",
