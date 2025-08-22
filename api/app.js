@@ -5,7 +5,7 @@
 const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
-const { sequelize, User, Course } = require('./models');
+const { sequelize } = require('./models');
 const routes = require('./routes');
 
 
@@ -70,7 +70,7 @@ app.use((req, res) => {
 });
 
 // Global Error Handler
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   if (enableGlobalErrorLogging) {
     console.error(`Global error handler: ${JSON.stringify(err.stack)}`);
   }

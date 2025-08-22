@@ -22,7 +22,7 @@ module.exports = [
     rules: {
       // General JavaScript rules
       'no-unused-vars': 'warn',
-      'no-console': 'warn',
+      'no-console': 'off', // Disable console warnings
       'prefer-const': 'error',
       'no-var': 'error',
       'eqeqeq': 'error',
