@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import UserContext from '../context/UserContext.jsx';
 
@@ -11,7 +11,7 @@ import UserContext from '../context/UserContext.jsx';
  */
 const Courses = () => {
   // Get authenticated user data from UserContext
-  const { user } = useContext(UserContext);
+  const { user: _user } = useContext(UserContext);
 
   // ROUTING AND NAVIGATION
   const navigate = useNavigate();
@@ -27,13 +27,13 @@ const Courses = () => {
    */
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [fetchCourses]);
 
   /**
    * Fetches all courses from the API
    * Updates the courses state and handles any errors that occur
    */
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/courses');
@@ -53,13 +53,12 @@ const Courses = () => {
       const data = await response.json();
       setCourses(data.courses);
       setError(null);
-    } catch (err) {
-      console.error('Error fetching courses:', err);
+    } catch (_err) {
       setError('Failed to load courses. Please try again later.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   // LOADING STATE - Show loading message while fetching courses
   if (loading) {

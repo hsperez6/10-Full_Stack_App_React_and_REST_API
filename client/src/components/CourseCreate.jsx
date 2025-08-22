@@ -86,9 +86,8 @@ const CourseCreate = () => {
           setErrors(['Failed to create course. Please try again.']);
         }
       }
-    } catch (err) {
+    } catch (_err) {
       // Handle network or other errors
-      console.error('Error creating course:', err);
       setErrors(['Failed to create course. Please try again.']);
     } finally {
       // Reset loading state

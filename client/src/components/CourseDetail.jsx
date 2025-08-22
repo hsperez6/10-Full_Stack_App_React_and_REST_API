@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import UserContext from '../context/UserContext.jsx';
@@ -33,7 +33,7 @@ const CourseDetail = () => {
     if (id) {
       fetchCourse();
     }
-  }, [id]);
+  }, [id, fetchCourse]);
 
   /**
    * useEffect hook to handle redirects when course data is not available
@@ -50,7 +50,7 @@ const CourseDetail = () => {
    * Fetches course data from the API
    * Handles authentication headers and error responses
    */
-  const fetchCourse = async () => {
+  const fetchCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -91,12 +91,11 @@ const CourseDetail = () => {
       setCourse(data.course);
       setError(null);
     } catch (err) {
-      console.error('Error fetching course:', err);
       setError(err.message || 'Failed to load course. Please try again later.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user.credentials, navigate]);
 
   /**
    * Handles course deletion with user confirmation
@@ -125,11 +124,10 @@ const CourseDetail = () => {
             return;
           }
           const errorData = await response.json();
-          alert(errorData.message || 'Failed to delete course');
+          setError(errorData.message || 'Failed to delete course');
         }
-      } catch (err) {
-        console.error('Error deleting course:', err);
-        alert('Failed to delete course');
+      } catch (_err) {
+        setError('Failed to delete course');
       }
     }
   };

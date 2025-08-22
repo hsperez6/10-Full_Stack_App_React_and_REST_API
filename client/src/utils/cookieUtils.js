@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 // Cookie configuration constants
 export const COOKIE_OPTIONS = {
   expires: 7, // Cookie expires in 7 days
-  secure: process.env.NODE_ENV === 'production', // Secure in production
+  secure: import.meta.env.MODE === 'production', // Secure in production
   sameSite: 'strict' // Protect against CSRF attacks
 };
 
@@ -32,8 +32,7 @@ export const storeUserInCookies = (userData, credentials) => {
     Cookies.set(USER_STATE_COOKIE_KEY, JSON.stringify(userStateForStorage), COOKIE_OPTIONS);
 
     return true;
-  } catch (error) {
-    console.error('Error storing user in cookies:', error);
+  } catch (_error) {
     return false;
   }
 };
@@ -46,8 +45,7 @@ export const storeUserInCookies = (userData, credentials) => {
 export const getUserCredentialsFromCookies = () => {
   try {
     return Cookies.get(USER_COOKIE_KEY) || null;
-  } catch (error) {
-    console.error('Error retrieving user credentials from cookies:', error);
+  } catch (_error) {
     return null;
   }
 };
@@ -64,8 +62,7 @@ export const getUserStateFromCookies = () => {
       return JSON.parse(storedState);
     }
     return null;
-  } catch (error) {
-    console.error('Error retrieving user state from cookies:', error);
+  } catch (_error) {
     return null;
   }
 };
@@ -78,8 +75,7 @@ export const clearUserCookies = () => {
     Cookies.remove(USER_COOKIE_KEY);
     Cookies.remove(USER_STATE_COOKIE_KEY);
     return true;
-  } catch (error) {
-    console.error('Error clearing user cookies:', error);
+  } catch (_error) {
     return false;
   }
 };
@@ -94,8 +90,7 @@ export const hasValidUserCookies = () => {
     const credentials = Cookies.get(USER_COOKIE_KEY);
     const userState = Cookies.get(USER_STATE_COOKIE_KEY);
     return !!(credentials && userState);
-  } catch (error) {
-    console.error('Error checking user cookies:', error);
+  } catch (_error) {
     return false;
   }
 };

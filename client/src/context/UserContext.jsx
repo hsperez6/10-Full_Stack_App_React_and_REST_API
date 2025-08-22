@@ -61,8 +61,8 @@ export const UserProvider = (props) => {
             clearUserCookies();
           }
         }
-      } catch (error) {
-        console.error('Error restoring user from cookies:', error);
+      } catch (_error) {
+        // Silently handle error - user will need to sign in again
         // Clear invalid cookies on error
         clearUserCookies();
       } finally {
@@ -72,6 +72,37 @@ export const UserProvider = (props) => {
 
     restoreUserFromCookies();
   }, []);
+
+  /**
+   * Helper function to encode string to base64 (browser-compatible)
+   * @param {string} str - String to encode
+   * @returns {string} Base64 encoded string
+   */
+  const encodeBase64 = (str) => {
+    // Use a simple base64 encoding implementation
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    let output = '';
+    const bytes = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) {
+      bytes[i] = str.charCodeAt(i);
+    }
+
+    let byteNum;
+    let chunk;
+
+    for (let i = 0; i < bytes.length; i += 3) {
+      byteNum = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+      chunk = [
+        chars[(byteNum >> 18) & 0x3F],
+        chars[(byteNum >> 12) & 0x3F],
+        chars[(byteNum >> 6) & 0x3F],
+        chars[byteNum & 0x3F]
+      ];
+      output += chunk.join('');
+    }
+
+    return output;
+  };
 
   /**
    * Authenticates a user with email and password
@@ -85,7 +116,7 @@ export const UserProvider = (props) => {
   const signInUser = async (emailAddress, password) => {
     try {
       // Create Basic Auth header by encoding email:password in base64
-      const credentials = btoa(`${emailAddress}:${password}`);
+      const credentials = encodeBase64(`${emailAddress}:${password}`);
 
       // First, validate credentials by trying to get user info
       const response = await fetch('/api/users', {
@@ -131,9 +162,8 @@ export const UserProvider = (props) => {
           message: errorData.message || 'Invalid email address or password'
         };
       }
-    } catch (error) {
+    } catch (_error) {
       // Handle network or other unexpected errors
-      console.error('Error during sign in:', error);
       return {
         success: false,
         message: 'Network error. Please try again.'

@@ -53,9 +53,8 @@ const UserSignIn = () => {
         // Sign in failed, show error message from API
         setErrors([result.message]);
       }
-    } catch (error) {
+    } catch (_error) {
       // Handle unexpected errors during sign-in process
-      console.error('Error during sign in:', error);
       setErrors(['An unexpected error occurred. Please try again.']);
     } finally {
       setLoading(false);
@@ -105,7 +104,7 @@ const UserSignIn = () => {
 
       {/* Link to sign up page for new users */}
       <p>
-        Don't have a user account? Click here to{' '}
+        Don&apos;t have a user account? Click here to{' '}
         <a href="/signup">sign up</a>!
       </p>
     </div>

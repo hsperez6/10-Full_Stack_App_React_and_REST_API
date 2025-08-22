@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UserContext from '../context/UserContext.jsx';
 import ValidationErrors from './ValidationErrors.jsx';
@@ -40,7 +40,7 @@ const CourseUpdate = () => {
     if (id) {
       fetchCourse();
     }
-  }, [id]);
+  }, [id, fetchCourse]);
 
   /**
    * useEffect hook to handle redirects when course data is not available
@@ -57,7 +57,7 @@ const CourseUpdate = () => {
    * Fetches course data from the API and populates the form
    * Validates that the current user owns the course before allowing updates
    */
-  const fetchCourse = async () => {
+  const fetchCourse = useCallback(async () => {
     try {
       setLoading(true);
       setErrors([]);
@@ -111,13 +111,12 @@ const CourseUpdate = () => {
         materialsNeeded: data.course.materialsNeeded || ''
       });
       setErrors([]);
-    } catch (err) {
-      console.error('Error fetching course:', err);
-      setErrors([err.message || 'Failed to load course. Please try again later.']);
+    } catch (_err) {
+      setErrors([_err.message || 'Failed to load course. Please try again later.']);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user.credentials, user.id, navigate]);
 
   /**
    * Handles input field changes
@@ -173,8 +172,7 @@ const CourseUpdate = () => {
           setErrors(['Failed to update course. Please try again.']);
         }
       }
-    } catch (err) {
-      console.error('Error updating course:', err);
+    } catch (_err) {
       setErrors(['Failed to update course. Please try again.']);
     } finally {
       setSubmitting(false);
