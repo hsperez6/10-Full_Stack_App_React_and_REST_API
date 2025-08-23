@@ -32,7 +32,7 @@ export const storeUserInCookies = (userData, credentials) => {
     Cookies.set(USER_STATE_COOKIE_KEY, JSON.stringify(userStateForStorage), COOKIE_OPTIONS);
 
     return true;
-  } catch (_error) {
+  } catch {
     return false;
   }
 };
@@ -45,7 +45,7 @@ export const storeUserInCookies = (userData, credentials) => {
 export const getUserCredentialsFromCookies = () => {
   try {
     return Cookies.get(USER_COOKIE_KEY) || null;
-  } catch (_error) {
+  } catch {
     return null;
   }
 };
@@ -62,7 +62,7 @@ export const getUserStateFromCookies = () => {
       return JSON.parse(storedState);
     }
     return null;
-  } catch (_error) {
+  } catch {
     return null;
   }
 };
@@ -75,7 +75,7 @@ export const clearUserCookies = () => {
     Cookies.remove(USER_COOKIE_KEY);
     Cookies.remove(USER_STATE_COOKIE_KEY);
     return true;
-  } catch (_error) {
+  } catch {
     return false;
   }
 };
@@ -90,7 +90,7 @@ export const hasValidUserCookies = () => {
     const credentials = Cookies.get(USER_COOKIE_KEY);
     const userState = Cookies.get(USER_STATE_COOKIE_KEY);
     return !!(credentials && userState);
-  } catch (_error) {
+  } catch {
     return false;
   }
 };

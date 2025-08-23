@@ -32,28 +32,6 @@ const CourseUpdate = () => {
   const navigate = useNavigate();                                // Navigation function
 
   /**
-   * useEffect hook to fetch course data when component mounts or course ID changes
-   * Since authentication is handled by PrivateRoute, we can directly fetch course data
-   */
-  useEffect(() => {
-    // Fetch course data if course ID is available
-    if (id) {
-      fetchCourse();
-    }
-  }, [id, fetchCourse]);
-
-  /**
-   * useEffect hook to handle redirects when course data is not available
-   * Redirects to /notfound if course fetch completed but no course was returned
-   */
-  useEffect(() => {
-    // If loading is false and no course was returned, redirect to notfound
-    if (!loading && !course && errors.length === 0) {
-      navigate('/notfound');
-    }
-  }, [loading, course, errors, navigate]);
-
-  /**
    * Fetches course data from the API and populates the form
    * Validates that the current user owns the course before allowing updates
    */
@@ -119,6 +97,28 @@ const CourseUpdate = () => {
   }, [id, user.credentials, user.id, navigate]);
 
   /**
+   * useEffect hook to fetch course data when component mounts or course ID changes
+   * Since authentication is handled by PrivateRoute, we can directly fetch course data
+   */
+  useEffect(() => {
+    // Fetch course data if course ID is available
+    if (id) {
+      fetchCourse();
+    }
+  }, [id, fetchCourse]);
+
+  /**
+   * useEffect hook to handle redirects when course data is not available
+   * Redirects to /notfound if course fetch completed but no course was returned
+   */
+  useEffect(() => {
+    // If loading is false and no course was returned, redirect to notfound
+    if (!loading && !course && errors.length === 0) {
+      navigate('/notfound');
+    }
+  }, [loading, course, errors, navigate]);
+
+  /**
    * Handles input field changes
    * Updates the corresponding field in formData state
    * @param {Event} e - The change event from the input field
@@ -172,7 +172,7 @@ const CourseUpdate = () => {
           setErrors(['Failed to update course. Please try again.']);
         }
       }
-    } catch (_err) {
+    } catch {
       setErrors(['Failed to update course. Please try again.']);
     } finally {
       setSubmitting(false);

@@ -81,7 +81,7 @@ const UserSignUp = () => {
           setErrors(['Failed to create user. Please try again.']);
         }
       }
-    } catch (_err) {
+    } catch {
       // Handle network or other errors
       setErrors(['Failed to create user. Please try again.']);
     } finally {

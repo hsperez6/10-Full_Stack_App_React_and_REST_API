@@ -16,7 +16,7 @@ import UserContext from '../context/UserContext.jsx';
  * @param {Object} props - Component props (unused but destructured for future use)
  * @returns {JSX.Element} Either the protected route content, a redirect, or loading state
  */
-const PrivateRoute = ({ children: _children, ..._rest }) => {
+const PrivateRoute = () => {
   // Get user authentication status and initialization state from UserContext
   const { user, isInitialized } = useContext(UserContext);
 

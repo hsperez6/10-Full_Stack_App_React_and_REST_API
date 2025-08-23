@@ -44,6 +44,7 @@ const UserSignIn = () => {
     try {
       // Attempt to sign in using credentials from form
       const result = await actions.signIn(emailAddress.current.value, password.current.value);
+      console.log('Sign in result:', result);
 
       if (result.success) {
         // Sign in successful, redirect to intended destination or default to courses list
@@ -51,10 +52,12 @@ const UserSignIn = () => {
         navigate(intendedDestination);
       } else {
         // Sign in failed, show error message from API
+        console.log('Sign in failed with message:', result.message);
         setErrors([result.message]);
       }
     } catch (_error) {
       // Handle unexpected errors during sign-in process
+      console.error('Unexpected error during sign in:', _error);
       setErrors(['An unexpected error occurred. Please try again.']);
     } finally {
       setLoading(false);

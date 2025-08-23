@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import UserContext from '../context/UserContext.jsx';
 
 /**
  * Courses Component
@@ -10,8 +9,7 @@ import UserContext from '../context/UserContext.jsx';
  * course details and course creation. Authentication is handled by PrivateRoute wrapper.
  */
 const Courses = () => {
-  // Get authenticated user data from UserContext
-  const { user: _user } = useContext(UserContext);
+  // Authentication is handled by PrivateRoute wrapper
 
   // ROUTING AND NAVIGATION
   const navigate = useNavigate();
@@ -20,14 +18,6 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);        // Array of course objects
   const [loading, setLoading] = useState(true);      // Loading state indicator
   const [error, setError] = useState(null);          // Error state for error handling
-
-  /**
-   * useEffect hook to fetch courses when component mounts
-   * Since authentication is handled by PrivateRoute, we can directly fetch courses
-   */
-  useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
 
   /**
    * Fetches all courses from the API
@@ -53,12 +43,20 @@ const Courses = () => {
       const data = await response.json();
       setCourses(data.courses);
       setError(null);
-    } catch (_err) {
+    } catch {
       setError('Failed to load courses. Please try again later.');
     } finally {
       setLoading(false);
     }
   }, [navigate]);
+
+  /**
+   * useEffect hook to fetch courses when component mounts
+   * Since authentication is handled by PrivateRoute, we can directly fetch courses
+   */
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   // LOADING STATE - Show loading message while fetching courses
   if (loading) {

@@ -61,7 +61,7 @@ export const UserProvider = (props) => {
             clearUserCookies();
           }
         }
-      } catch (_error) {
+      } catch {
         // Silently handle error - user will need to sign in again
         // Clear invalid cookies on error
         clearUserCookies();
@@ -79,29 +79,8 @@ export const UserProvider = (props) => {
    * @returns {string} Base64 encoded string
    */
   const encodeBase64 = (str) => {
-    // Use a simple base64 encoding implementation
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    let output = '';
-    const bytes = new Uint8Array(str.length);
-    for (let i = 0; i < str.length; i++) {
-      bytes[i] = str.charCodeAt(i);
-    }
-
-    let byteNum;
-    let chunk;
-
-    for (let i = 0; i < bytes.length; i += 3) {
-      byteNum = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
-      chunk = [
-        chars[(byteNum >> 18) & 0x3F],
-        chars[(byteNum >> 12) & 0x3F],
-        chars[(byteNum >> 6) & 0x3F],
-        chars[byteNum & 0x3F]
-      ];
-      output += chunk.join('');
-    }
-
-    return output;
+    // Use browser's built-in base64 encoding for reliability
+    return btoa(str);
   };
 
   /**
@@ -117,6 +96,7 @@ export const UserProvider = (props) => {
     try {
       // Create Basic Auth header by encoding email:password in base64
       const credentials = encodeBase64(`${emailAddress}:${password}`);
+      console.log('Attempting to sign in with:', { emailAddress, credentials: credentials.substring(0, 10) + '...' });
 
       // First, validate credentials by trying to get user info
       const response = await fetch('/api/users', {
@@ -125,18 +105,23 @@ export const UserProvider = (props) => {
         }
       });
 
+      console.log('API response status:', response.status);
+
       if (response.ok) {
         // Authentication successful, get user data from response
         const userData = await response.json();
+        console.log('User data received:', userData);
 
         // Create authenticated user object with complete information
         const authenticatedUser = {
           id: userData.id,                    // User's unique identifier
-          emailAddress,                       // User's email address
+          emailAddress: userData.email,       // User's email address
           firstName: userData.firstName,      // User's first name
           lastName: userData.lastName,        // User's last name
           credentials                         // Encoded credentials for future API calls
         };
+
+        console.log('Created authenticated user object:', authenticatedUser);
 
         // Store user data in cookies for persistence
         storeUserInCookies(authenticatedUser, credentials);
@@ -162,7 +147,7 @@ export const UserProvider = (props) => {
           message: errorData.message || 'Invalid email address or password'
         };
       }
-    } catch (_error) {
+    } catch {
       // Handle network or other unexpected errors
       return {
         success: false,

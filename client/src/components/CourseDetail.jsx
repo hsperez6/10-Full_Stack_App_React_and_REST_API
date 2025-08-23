@@ -25,28 +25,6 @@ const CourseDetail = () => {
   const navigate = useNavigate();                    // Navigation function
 
   /**
-   * useEffect hook to fetch course data when component mounts or course ID changes
-   * Since authentication is handled by PrivateRoute, we can directly fetch course data
-   */
-  useEffect(() => {
-    // Fetch course data if course ID is available
-    if (id) {
-      fetchCourse();
-    }
-  }, [id, fetchCourse]);
-
-  /**
-   * useEffect hook to handle redirects when course data is not available
-   * Redirects to /notfound if course fetch completed but no course was returned
-   */
-  useEffect(() => {
-    // If loading is false and no course was returned, redirect to notfound
-    if (!loading && !course && !error) {
-      navigate('/notfound');
-    }
-  }, [loading, course, error, navigate]);
-
-  /**
    * Fetches course data from the API
    * Handles authentication headers and error responses
    */
@@ -98,6 +76,28 @@ const CourseDetail = () => {
   }, [id, user.credentials, navigate]);
 
   /**
+   * useEffect hook to fetch course data when component mounts or course ID changes
+   * Since authentication is handled by PrivateRoute, we can directly fetch course data
+   */
+  useEffect(() => {
+    // Fetch course data if course ID is available
+    if (id) {
+      fetchCourse();
+    }
+  }, [id, fetchCourse]);
+
+  /**
+   * useEffect hook to handle redirects when course data is not available
+   * Redirects to /notfound if course fetch completed but no course was returned
+   */
+  useEffect(() => {
+    // If loading is false and no course was returned, redirect to notfound
+    if (!loading && !course && !error) {
+      navigate('/notfound');
+    }
+  }, [loading, course, error, navigate]);
+
+  /**
    * Handles course deletion with user confirmation
    * Sends DELETE request to API and redirects to courses list on success
    */
@@ -126,7 +126,7 @@ const CourseDetail = () => {
           const errorData = await response.json();
           setError(errorData.message || 'Failed to delete course');
         }
-      } catch (_err) {
+      } catch {
         setError('Failed to delete course');
       }
     }

@@ -18,6 +18,8 @@ export default [
         fetch: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
       },
       parserOptions: {
         ecmaFeatures: {
